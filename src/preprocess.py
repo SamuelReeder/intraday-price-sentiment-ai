@@ -42,6 +42,33 @@ class Data:
 
         return inverted_features
     
+    def compute_scores(self, prices: np.ndarray, look_ahead: int = 30, decay_factor: float = 0.05, moving_average_period: int = 10) -> np.ndarray:
+
+        # moving average
+        smoothed_prices = np.convolve(prices, np.ones(moving_average_period)/moving_average_period, mode='valid')
+
+        scores = np.zeros(len(smoothed_prices) - look_ahead)
+
+        for i in range(len(scores)):
+            # Calculate the moving average price changes for the look-ahead period
+            future_prices = smoothed_prices[i + 1:i + 1 + look_ahead]
+            price_changes = future_prices - smoothed_prices[i]
+
+            # Apply time decay
+            time_decay = np.exp(-decay_factor * np.arange(look_ahead))
+
+            # Combine time decay and magnitude of changes
+            weights = time_decay * np.abs(price_changes)
+
+            # Calculate the weighted sum of price changes
+            scores[i] = np.sum(weights * price_changes)
+
+        # Normalize the scores to a 0-10 scale
+        min_score, max_score = np.min(scores), np.max(scores)
+        normalized_scores = (scores - min_score) / (max_score - min_score) * 10
+        
+        return normalized_scores
+    
     
     preprocess_and_normalize = lambda self, series: self.normalize(self.preprocess_data(series))
                 
