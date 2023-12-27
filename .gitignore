@@ -1,3 +1,5 @@
+src/secrets.py
+src/model.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
