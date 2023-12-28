@@ -1,5 +1,4 @@
-from preprocess import Data
-from data import get_data
+from data import Data, get_data
 from config import API_KEY
 
 
@@ -9,16 +8,26 @@ def main():
     # should give 30 min intraday context too?
     # could organize 1 min data into 30 min past a certain time
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=SPY&interval=1min&outputsize=full&apikey=${API_KEY}'
+    url_30 = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=SPY&interval=30min&outputsize=full&apikey=${API_KEY}'
 
     # saves scalers to class
     data = Data()
-    normalized_features = data.preprocess_and_normalize(get_data(url)["Time Series (1min)"])
-    print(normalized_features)
+    normalized_features = data.preprocess(get_data(url)["Time Series (1min)"])
+    normalized_30_features = data.preprocess(get_data(url_30)["Time Series (30min)"])
     
-    labels = data.compute_scores(normalized_features[:, 3])
+    print(len(normalized_features) / len(normalized_30_features))
+
+        
+    print(data.generate_30_min_data(normalized_features))
+    print(normalized_30_features)
     
     
-    print(labels)
+    # labels = data.compute_scores(normalized_features[:, 3])
+    
+    for i in data.create_train(normalized_features):
+        print(i)
+    
+    # print(labels)
     
     
     
